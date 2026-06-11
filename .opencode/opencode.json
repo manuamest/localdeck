@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    "docs/product-boundaries.md",
+    "docs/detection-strategy.md",
+    "docs/architecture.md",
+    "docs/security-model.md"
+  ],
+  "skills": {
+    "paths": [
+      ".opencode/skills",
+      "~/.opencode/skills"
+    ]
+  },
+  "permission": {
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "docker ps*": "allow",
+      "docker inspect*": "allow",
+      "docker compose ls*": "allow",
+      "docker compose ps*": "allow",
+      "ss *": "allow",
+      "lsof *": "allow",
+      "curl http://localhost*": "allow",
+      "curl http://127.0.0.1*": "allow",
+      "npm test*": "allow",
+      "npm run test*": "allow",
+      "npm run lint*": "allow",
+      "npm run build*": "allow",
+      "pytest*": "allow"
+    }
+  }
+}

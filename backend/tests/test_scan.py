@@ -1,0 +1,50 @@
+from datetime import UTC, datetime
+
+from app.config import Settings
+from app.scanner.probe import HttpProbeResult
+from app.scanner.scan import service_from_probe
+
+
+def test_service_from_probe_builds_service_record_with_title_and_favicon() -> None:
+    settings = Settings(host="host.docker.internal", port=4888, scan_ports="8000")
+    checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
+    result = HttpProbeResult(
+        url="http://host.docker.internal:8000",
+        status_code=200,
+        response_time_ms=25,
+        content_type="text/html",
+        text='<html><head><title>Demo App</title><link rel="icon" href="/icon.png"></head></html>',
+    )
+
+    service = service_from_probe(settings, 8000, result, checked_at)
+
+    assert service.id == "http-host.docker.internal-8000"
+    assert service.title == "Demo App"
+    assert service.url == "http://host.docker.internal:8000"
+    assert service.display_url == "http://localhost:8000"
+    assert service.host == "host.docker.internal"
+    assert service.port == 8000
+    assert service.protocol == "http"
+    assert service.status_code == 200
+    assert service.response_time_ms == 25
+    assert service.favicon_url == "http://host.docker.internal:8000/icon.png"
+    assert service.last_seen == checked_at
+    assert service.last_checked == checked_at
+    assert service.error is None
+
+
+def test_service_from_probe_uses_port_fallback_title() -> None:
+    settings = Settings(host="localhost", port=4888, scan_ports="8000")
+    checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
+    result = HttpProbeResult(
+        url="http://localhost:8000",
+        status_code=404,
+        response_time_ms=5,
+        content_type="text/html",
+        text="<html></html>",
+    )
+
+    service = service_from_probe(settings, 8000, result, checked_at)
+
+    assert service.title == "Service on port 8000"
+    assert service.favicon_url == "http://localhost:8000/favicon.ico"
