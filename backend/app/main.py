@@ -4,7 +4,7 @@ from contextlib import suppress
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.health import router as health_router
@@ -49,6 +49,11 @@ def register_frontend(app: FastAPI, dist_dir: Path = FRONTEND_DIST) -> None:
     @app.get("/", response_class=HTMLResponse)
     async def frontend_index() -> str:
         return index_file.read_text(encoding="utf-8")
+
+    @app.get("/favicon.svg")
+    @app.head("/favicon.svg")
+    async def frontend_favicon() -> FileResponse:
+        return FileResponse(dist_dir / "favicon.svg", media_type="image/svg+xml")
 
     @app.get("/{path:path}", response_class=HTMLResponse)
     async def frontend_fallback(path: str) -> str:
