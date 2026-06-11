@@ -12,7 +12,10 @@ from app.scanner.probe import HttpProbeResult, probe_http
 
 
 def service_from_probe(settings: Settings, port: int, result: HttpProbeResult, checked_at: datetime) -> ServiceRecord:
-    title = extract_title(result.text) or f"Service on port {port}"
+    title = extract_title(result.text)
+    if title in {None, "Redirecting...", "Redirecting"}:
+        title = f"Service on port {port}"
+
     return ServiceRecord(
         id=f"http-{settings.host}-{port}",
         title=title,
@@ -52,3 +55,8 @@ async def scan_loop(settings: Settings, registry: ServiceRegistry) -> None:
         scanned_at, services = await scan_services(settings)
         registry.replace(services, scanned_at)
         await asyncio.sleep(settings.scan_interval)
+
+
+async def scan_once(settings: Settings, registry: ServiceRegistry) -> None:
+    scanned_at, services = await scan_services(settings)
+    registry.replace(services, scanned_at)

@@ -1,0 +1,14 @@
+services:
+  localdeck:
+    build: .
+    image: localdeck:dev
+    ports:
+      - "4888:4888"
+    environment:
+      LOCALDECK_HOST: host.docker.internal
+      LOCALDECK_PORT: 4888
+      LOCALDECK_SCAN_PORTS: 3000,3001,4173,4200,5000,5173,5500,6274,7000,7860,8000,8001,8080,8888,9000,11434
+      LOCALDECK_SCAN_INTERVAL: 10
+      LOCALDECK_REQUEST_TIMEOUT: 2
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

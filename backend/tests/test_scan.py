@@ -48,3 +48,19 @@ def test_service_from_probe_uses_port_fallback_title() -> None:
 
     assert service.title == "Service on port 8000"
     assert service.favicon_url == "http://localhost:8000/favicon.ico"
+
+
+def test_service_from_probe_ignores_redirecting_title() -> None:
+    settings = Settings(host="localhost", port=4888, scan_ports="5050")
+    checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
+    result = HttpProbeResult(
+        url="http://localhost:5050",
+        status_code=302,
+        response_time_ms=5,
+        content_type="text/html",
+        text="<title>Redirecting...</title>",
+    )
+
+    service = service_from_probe(settings, 5050, result, checked_at)
+
+    assert service.title == "Service on port 5050"
