@@ -18,8 +18,8 @@ Localdeck v0.1 is a Dockerized FastAPI + React app. It keeps only the latest sca
 1. FastAPI starts and creates an in-memory `ServiceRegistry`.
 2. A background scan loop runs every `LOCALDECK_SCAN_INTERVAL` seconds.
 3. The scanner parses `LOCALDECK_SCAN_PORTS` and skips `LOCALDECK_PORT`.
-4. Each port is probed through HTTP on `LOCALDECK_HOST`.
-5. Safe same-host HTTP redirects are followed.
+4. Each port is probed through HTTP, then HTTPS if HTTP does not respond, on `LOCALDECK_HOST`.
+5. Safe same-protocol same-host redirects are followed.
 6. Successful HTTP responses become `ServiceRecord` objects.
 7. The registry replaces the previous snapshot.
 8. The frontend polls `GET /api/services` and can trigger `POST /api/scan`.
@@ -58,7 +58,6 @@ A v0.1 detected service includes:
 
 ## Open Decisions For Later Versions
 
-- HTTPS probing behavior.
 - Docker socket discovery as an optional read-only module.
 - Framework/runtime classification heuristics.
 - Port range parsing for `LOCALDECK_SCAN_PORTS`.

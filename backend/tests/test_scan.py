@@ -10,6 +10,7 @@ def test_service_from_probe_builds_service_record_with_title_and_favicon() -> No
     checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
     result = HttpProbeResult(
         url="http://host.docker.internal:8000",
+        protocol="http",
         status_code=200,
         response_time_ms=25,
         content_type="text/html",
@@ -38,6 +39,7 @@ def test_service_from_probe_uses_port_fallback_title() -> None:
     checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
     result = HttpProbeResult(
         url="http://localhost:8000",
+        protocol="http",
         status_code=404,
         response_time_ms=5,
         content_type="text/html",
@@ -55,6 +57,7 @@ def test_service_from_probe_ignores_redirecting_title() -> None:
     checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
     result = HttpProbeResult(
         url="http://localhost:5050",
+        protocol="http",
         status_code=302,
         response_time_ms=5,
         content_type="text/html",
@@ -64,3 +67,23 @@ def test_service_from_probe_ignores_redirecting_title() -> None:
     service = service_from_probe(settings, 5050, result, checked_at)
 
     assert service.title == "Service on port 5050"
+
+
+def test_service_from_probe_builds_https_service_record() -> None:
+    settings = Settings(host="host.docker.internal", port=4888, scan_ports="9443")
+    checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
+    result = HttpProbeResult(
+        url="https://host.docker.internal:9443",
+        protocol="https",
+        status_code=200,
+        response_time_ms=25,
+        content_type="text/html",
+        text="<title>Secure App</title>",
+    )
+
+    service = service_from_probe(settings, 9443, result, checked_at)
+
+    assert service.id == "https-host.docker.internal-9443"
+    assert service.url == "https://host.docker.internal:9443"
+    assert service.display_url == "https://localhost:9443"
+    assert service.protocol == "https"

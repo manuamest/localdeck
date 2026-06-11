@@ -106,13 +106,14 @@ environment:
 | `LOCALDECK_SCAN_INTERVAL` | `10` | Scan interval in seconds |
 | `LOCALDECK_REQUEST_TIMEOUT` | `2` | HTTP request timeout in seconds |
 
-## Current v0.1 Behavior
+## Current Behavior
 
 Localdeck currently:
 
 - only allows local/private scan hosts
-- scans explicit HTTP ports only
-- follows safe local HTTP redirects
+- scans explicit HTTP/HTTPS ports
+- tries HTTP first, then HTTPS when HTTP does not respond
+- follows safe same-protocol local redirects
 - ignores Localdeck's own port
 - extracts HTML titles
 - resolves basic favicons
@@ -122,7 +123,6 @@ Localdeck currently:
 
 Not included yet:
 
-- HTTPS probing
 - Docker socket discovery
 - port ranges like `3000-3010`
 - persistent settings

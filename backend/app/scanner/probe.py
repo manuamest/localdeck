@@ -10,6 +10,7 @@ MAX_LOCAL_REDIRECTS = 3
 @dataclass(frozen=True)
 class HttpProbeResult:
     url: str
+    protocol: str
     status_code: int
     response_time_ms: int
     content_type: str | None
@@ -22,15 +23,34 @@ async def probe_http(
     timeout: float,
     client: httpx.AsyncClient | None = None,
 ) -> HttpProbeResult | None:
-    url = f"http://{host}:{port}"
+    return await probe_url("http", host, port, timeout, client)
+
+
+async def probe_https(
+    host: str,
+    port: int,
+    timeout: float,
+    client: httpx.AsyncClient | None = None,
+) -> HttpProbeResult | None:
+    return await probe_url("https", host, port, timeout, client)
+
+
+async def probe_url(
+    protocol: str,
+    host: str,
+    port: int,
+    timeout: float,
+    client: httpx.AsyncClient | None = None,
+) -> HttpProbeResult | None:
+    url = f"{protocol}://{host}:{port}"
     owns_client = client is None
 
     if client is None:
-        client = httpx.AsyncClient(timeout=timeout, follow_redirects=False)
+        client = httpx.AsyncClient(timeout=timeout, follow_redirects=False, verify=False)
 
     started = perf_counter()
     try:
-        response = await _get_with_local_redirects(client, url, host, port)
+        response = await _get_with_local_redirects(client, url, protocol, host, port)
     except httpx.HTTPError:
         return None
     finally:
@@ -40,6 +60,7 @@ async def probe_http(
     elapsed_ms = max(0, round((perf_counter() - started) * 1000))
     return HttpProbeResult(
         url=str(response.url),
+        protocol=protocol,
         status_code=response.status_code,
         response_time_ms=elapsed_ms,
         content_type=response.headers.get("content-type"),
@@ -47,9 +68,31 @@ async def probe_http(
     )
 
 
+async def probe_http_or_https(
+    host: str,
+    port: int,
+    timeout: float,
+    client: httpx.AsyncClient | None = None,
+) -> HttpProbeResult | None:
+    http_result = await probe_http(host, port, timeout, client=client)
+    if http_result is not None and not _looks_like_https_required(http_result):
+        return http_result
+
+    return await probe_https(host, port, timeout, client=client)
+
+
+def _looks_like_https_required(result: HttpProbeResult) -> bool:
+    if result.status_code != 400:
+        return False
+
+    text = result.text.lower()
+    return "http request to an https server" in text or "plain http request was sent to https" in text
+
+
 async def _get_with_local_redirects(
     client: httpx.AsyncClient,
     url: str,
+    protocol: str,
     host: str,
     port: int,
 ) -> httpx.Response:
@@ -66,7 +109,7 @@ async def _get_with_local_redirects(
         parsed = urlparse(next_url)
         next_port = parsed.port or (80 if parsed.scheme == "http" else 443)
 
-        if parsed.scheme != "http" or parsed.hostname != host or next_port != port:
+        if parsed.scheme != protocol or parsed.hostname != host or next_port != port:
             return response
 
         current_url = next_url

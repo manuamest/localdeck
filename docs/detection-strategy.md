@@ -22,11 +22,12 @@ Planned later sources:
 
 1. Parse `LOCALDECK_SCAN_PORTS` as a comma-separated list.
 2. Remove `LOCALDECK_PORT` to avoid showing Localdeck itself.
-3. Probe `http://{LOCALDECK_HOST}:{port}`.
-4. Follow safe same-host HTTP redirects, up to a small limit.
-5. Ignore ports that do not produce an HTTP response.
-6. Extract title and favicon metadata from the response body.
-7. Replace the in-memory service snapshot.
+3. Probe `http://{LOCALDECK_HOST}:{port}` first.
+4. Probe `https://{LOCALDECK_HOST}:{port}` if HTTP does not respond.
+5. Follow safe same-protocol same-host redirects, up to a small limit.
+6. Ignore ports that do not produce an HTTP or HTTPS response.
+7. Extract title and favicon metadata from the response body.
+8. Replace the in-memory service snapshot.
 
 ## Candidate Signals
 
@@ -47,7 +48,7 @@ Avoid showing services that are probably not web apps:
 - internal metrics ports unless they serve a usable web UI
 - raw TCP services that do not respond as HTTP
 
-v0.1 only shows services that return an HTTP response.
+Localdeck only shows services that return an HTTP or HTTPS response.
 
 ## Safety Rules
 
@@ -55,5 +56,5 @@ v0.1 only shows services that return an HTTP response.
 - Use short timeouts.
 - Do not send credentials.
 - Do not crawl beyond the root in v0.1.
-- Follow redirects only when they stay on the same HTTP host and port.
+- Follow redirects only when they stay on the same protocol, host, and port.
 - Do not execute code inside containers as part of default detection.

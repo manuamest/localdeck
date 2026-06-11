@@ -8,7 +8,7 @@ from app.models import ServiceRecord
 from app.registry import ServiceRegistry
 from app.scanner.html import extract_favicon_url, extract_title
 from app.scanner.ports import parse_scan_ports
-from app.scanner.probe import HttpProbeResult, probe_http
+from app.scanner.probe import HttpProbeResult, probe_http_or_https
 
 
 def service_from_probe(settings: Settings, port: int, result: HttpProbeResult, checked_at: datetime) -> ServiceRecord:
@@ -17,13 +17,13 @@ def service_from_probe(settings: Settings, port: int, result: HttpProbeResult, c
         title = f"Service on port {port}"
 
     return ServiceRecord(
-        id=f"http-{settings.host}-{port}",
+        id=f"{result.protocol}-{settings.host}-{port}",
         title=title,
         url=result.url,
-        display_url=f"http://localhost:{port}",
+        display_url=f"{result.protocol}://localhost:{port}",
         host=settings.host,
         port=port,
-        protocol="http",
+        protocol=result.protocol,
         status_code=result.status_code,
         response_time_ms=result.response_time_ms,
         favicon_url=extract_favicon_url(result.text, result.url),
@@ -37,9 +37,9 @@ async def scan_services(settings: Settings) -> tuple[datetime, list[ServiceRecor
     checked_at = datetime.now(UTC)
     ports = [port for port in parse_scan_ports(settings.scan_ports) if port != settings.port]
 
-    async with httpx.AsyncClient(timeout=settings.request_timeout, follow_redirects=False) as client:
+    async with httpx.AsyncClient(timeout=settings.request_timeout, follow_redirects=False, verify=False) as client:
         results = await asyncio.gather(
-            *(probe_http(settings.host, port, settings.request_timeout, client=client) for port in ports)
+            *(probe_http_or_https(settings.host, port, settings.request_timeout, client=client) for port in ports)
         )
 
     services = [
