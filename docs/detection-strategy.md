@@ -1,31 +1,36 @@
 # Detection Strategy
 
-Localdeck should combine multiple weak signals into confident app cards.
+Localdeck should combine multiple weak signals into confident app cards. v0.1 intentionally starts with a narrow signal: HTTP responses from configured local ports.
 
 ## Detection Sources
 
 Use read-only signals where possible:
 
-- listening TCP ports on localhost
+- HTTP probing of local URLs
+- HTML titles
+- basic favicon links
+
+Planned later sources:
+
 - Docker container port bindings
 - Docker Compose labels and project names
-- HTTP probing of local URLs
-- response headers and titles
+- response headers
 - known framework default ports and response patterns
 - process metadata only when safely available from the execution environment
 
 ## Initial Detection Pipeline
 
-1. Discover candidate ports.
-2. Probe likely HTTP endpoints on localhost.
-3. Read Docker and Compose metadata when available.
-4. Classify framework/runtime hints.
-5. Merge duplicate signals into app cards.
-6. Rank cards by confidence and usefulness.
+1. Parse `LOCALDECK_SCAN_PORTS` as a comma-separated list.
+2. Remove `LOCALDECK_PORT` to avoid showing Localdeck itself.
+3. Probe `http://{LOCALDECK_HOST}:{port}`.
+4. Follow safe same-host HTTP redirects, up to a small limit.
+5. Ignore ports that do not produce an HTTP response.
+6. Extract title and favicon metadata from the response body.
+7. Replace the in-memory service snapshot.
 
 ## Candidate Signals
 
-Framework hints may come from:
+Future framework hints may come from:
 
 - common ports: Vite `5173`, Next.js `3000`, Streamlit `8501`, Ollama `11434`, Langflow `7860` or configured ports
 - response headers: server, powered-by, content-type
@@ -42,10 +47,13 @@ Avoid showing services that are probably not web apps:
 - internal metrics ports unless they serve a usable web UI
 - raw TCP services that do not respond as HTTP
 
+v0.1 only shows services that return an HTTP response.
+
 ## Safety Rules
 
 - Probe only localhost or explicitly local/private addresses.
 - Use short timeouts.
 - Do not send credentials.
-- Do not crawl beyond the root and a tiny allowlist of metadata endpoints.
+- Do not crawl beyond the root in v0.1.
+- Follow redirects only when they stay on the same HTTP host and port.
 - Do not execute code inside containers as part of default detection.

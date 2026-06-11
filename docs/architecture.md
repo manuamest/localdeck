@@ -1,42 +1,64 @@
 # Architecture
 
-This document is intentionally provisional. Keep it updated when the plan is created.
+This document tracks the current Localdeck architecture.
 
-## Expected Components
+Localdeck v0.1 is a Dockerized FastAPI + React app. It keeps only the latest scan snapshot in memory and serves both the REST API and the dashboard from port `4888`.
 
-- Detector: collects local service signals.
-- Classifier: turns signals into framework/runtime hints.
-- Normalizer: merges signals into stable app records.
-- API: serves detected app records to the dashboard.
-- Dashboard UI: displays cards and discovery status.
-- Docker runtime: packages the app and exposes port `4888`.
+## Current Components
+
+- Scanner: probes configured HTTP ports on `LOCALDECK_HOST`.
+- HTML parser: extracts titles and basic favicon URLs.
+- Registry: stores the latest service snapshot in memory.
+- API: exposes health, services, and manual rescan endpoints.
+- Dashboard UI: displays live service cards and empty/loading/error states.
+- Docker runtime: builds the React app and runs FastAPI/Uvicorn on port `4888`.
+
+## Runtime Flow
+
+1. FastAPI starts and creates an in-memory `ServiceRegistry`.
+2. A background scan loop runs every `LOCALDECK_SCAN_INTERVAL` seconds.
+3. The scanner parses `LOCALDECK_SCAN_PORTS` and skips `LOCALDECK_PORT`.
+4. Each port is probed through HTTP on `LOCALDECK_HOST`.
+5. Safe same-host HTTP redirects are followed.
+6. Successful HTTP responses become `ServiceRecord` objects.
+7. The registry replaces the previous snapshot.
+8. The frontend polls `GET /api/services` and can trigger `POST /api/scan`.
 
 ## App Record Shape
 
-A detected app should eventually include:
+A v0.1 detected service includes:
 
 - id
-- display name
-- primary URL
+- title
+- URL used by the scanner
+- display URL shown to the user
+- host
 - port
-- source: docker, compose, process, probe, or unknown
-- framework/runtime hint
-- confidence
-- status
+- protocol
+- HTTP status code
+- approximate response time
+- favicon URL when found
 - last seen timestamp
-- metadata safe for display
+- last checked timestamp
+- error field, currently unused for successful services
 
 ## Design Constraints
 
 - Localdeck should work without a config file.
-- The dashboard should degrade gracefully when Docker access is unavailable.
+- Docker socket access is not required in v0.1.
 - Detection should be fast enough for interactive local use.
 - Backend and UI should stay decoupled through a small API contract.
+- No database, persistence, authentication, users, or favorites.
 
-## Open Decisions
+## Current API
 
-- Backend language and framework.
-- Frontend framework.
-- Whether detection runs by polling, on demand, or both.
-- How Docker socket access is mounted and documented.
-- How to support Linux, macOS, and Docker Desktop differences.
+- `GET /health`
+- `GET /api/services`
+- `POST /api/scan`
+
+## Open Decisions For Later Versions
+
+- HTTPS probing behavior.
+- Docker socket discovery as an optional read-only module.
+- Framework/runtime classification heuristics.
+- Port range parsing for `LOCALDECK_SCAN_PORTS`.
