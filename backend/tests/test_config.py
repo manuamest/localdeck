@@ -16,6 +16,14 @@ def test_get_settings_allows_default_host(monkeypatch: pytest.MonkeyPatch) -> No
     assert get_settings().host == "host.docker.internal"
 
 
+def test_get_settings_default_ports_include_common_docker_ui_ports(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("LOCALDECK_SCAN_PORTS", raising=False)
+
+    ports = set(get_settings().scan_ports.split(","))
+
+    assert {"5050", "8081", "9443"}.issubset(ports)
+
+
 def test_get_settings_allows_localhost(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("LOCALDECK_HOST", "localhost")
 

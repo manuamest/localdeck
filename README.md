@@ -76,8 +76,10 @@ docker run --rm \
 v0.1 scans this default list:
 
 ```text
-3000,3001,4173,4200,5000,5173,5500,6274,7000,7860,8000,8001,8080,8888,9000,11434
+3000,3001,4173,4200,5000,5050,5173,5500,6274,7000,7860,8000,8001,8080,8081,8888,9000,9443,11434
 ```
+
+The list includes common dev servers plus frequent local Docker UI ports such as pgAdmin `5050`, Adminer `8081`, Portainer `9000` and Portainer HTTPS `9443`.
 
 If your apps run on other ports, pass `LOCALDECK_SCAN_PORTS`:
 
