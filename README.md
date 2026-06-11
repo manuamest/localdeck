@@ -100,7 +100,7 @@ environment:
 
 | Variable | Default | Description |
 |---|---:|---|
-| `LOCALDECK_HOST` | `host.docker.internal` | Host scanned from inside the container |
+| `LOCALDECK_HOST` | `host.docker.internal` | Local/private host scanned from inside the container |
 | `LOCALDECK_PORT` | `4888` | Port used by Localdeck itself |
 | `LOCALDECK_SCAN_PORTS` | common dev ports | Comma-separated ports to scan |
 | `LOCALDECK_SCAN_INTERVAL` | `10` | Scan interval in seconds |
@@ -110,6 +110,7 @@ environment:
 
 Localdeck currently:
 
+- only allows local/private scan hosts
 - scans explicit HTTP ports only
 - follows safe local HTTP redirects
 - ignores Localdeck's own port

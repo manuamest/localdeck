@@ -1,0 +1,42 @@
+import pytest
+
+from app.config import get_settings
+
+
+@pytest.fixture(autouse=True)
+def clear_settings_cache():
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
+def test_get_settings_allows_default_host(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("LOCALDECK_HOST", raising=False)
+
+    assert get_settings().host == "host.docker.internal"
+
+
+def test_get_settings_allows_localhost(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LOCALDECK_HOST", "localhost")
+
+    assert get_settings().host == "localhost"
+
+
+def test_get_settings_allows_private_ip(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LOCALDECK_HOST", "192.168.1.10")
+
+    assert get_settings().host == "192.168.1.10"
+
+
+def test_get_settings_rejects_external_hostname(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LOCALDECK_HOST", "example.com")
+
+    with pytest.raises(ValueError, match="LOCALDECK_HOST must be local or private"):
+        get_settings()
+
+
+def test_get_settings_rejects_external_ip(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LOCALDECK_HOST", "8.8.8.8")
+
+    with pytest.raises(ValueError, match="LOCALDECK_HOST must be local or private"):
+        get_settings()

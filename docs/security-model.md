@@ -12,6 +12,7 @@ Localdeck inspects local developer environments. That is security-sensitive.
 ## Default Restrictions
 
 - No external network scanning.
+- `LOCALDECK_HOST` must be `localhost`, `host.docker.internal`, or a loopback/private/link-local IP address.
 - No container exec by default.
 - No secret collection.
 - No environment variable display unless explicitly designed and redacted.

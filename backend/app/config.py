@@ -1,12 +1,15 @@
 import os
 from dataclasses import dataclass
 from functools import lru_cache
+from ipaddress import ip_address
 
 
 DEFAULT_SCAN_PORTS = (
     "3000,3001,4173,4200,5000,5173,5500,6274,7000,7860,"
     "8000,8001,8080,8888,9000,11434"
 )
+
+ALLOWED_LOCAL_HOSTNAMES = {"localhost", "host.docker.internal"}
 
 
 @dataclass(frozen=True)
@@ -32,10 +35,26 @@ def _get_float(name: str, default: float) -> float:
     return float(value)
 
 
+def _get_host() -> str:
+    host = os.getenv("LOCALDECK_HOST", "host.docker.internal")
+    if host in ALLOWED_LOCAL_HOSTNAMES:
+        return host
+
+    try:
+        parsed = ip_address(host)
+    except ValueError as error:
+        raise ValueError(f"LOCALDECK_HOST must be local or private: {host}") from error
+
+    if parsed.is_loopback or parsed.is_private or parsed.is_link_local:
+        return host
+
+    raise ValueError(f"LOCALDECK_HOST must be local or private: {host}")
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings(
-        host=os.getenv("LOCALDECK_HOST", "host.docker.internal"),
+        host=_get_host(),
         port=_get_int("LOCALDECK_PORT", 4888),
         scan_ports=os.getenv("LOCALDECK_SCAN_PORTS", DEFAULT_SCAN_PORTS),
         scan_interval=_get_int("LOCALDECK_SCAN_INTERVAL", 10),
