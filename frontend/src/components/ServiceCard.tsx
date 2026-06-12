@@ -3,7 +3,7 @@ import { useState } from 'react'
 import type { ServiceRecord } from '../types/service'
 
 type ServiceCardProps = {
-  service: ServiceRecord
+  services: ServiceRecord[]
 }
 
 function formatCheckedAt(value: string) {
@@ -19,9 +19,15 @@ function getInitial(title: string) {
   return title.trim().charAt(0).toUpperCase() || '?'
 }
 
-function ServiceCard({ service }: ServiceCardProps) {
+function getPrimaryService(services: ServiceRecord[]) {
+  return services.find((service) => service.protocol === 'http') ?? services[0]
+}
+
+function ServiceCard({ services }: ServiceCardProps) {
+  const service = getPrimaryService(services)
+  const faviconSource = services.find((candidate) => candidate.favicon_url)?.favicon_url ?? null
   const [faviconFailed, setFaviconFailed] = useState(false)
-  const faviconUrl = service.favicon_url && !faviconFailed ? service.favicon_url : undefined
+  const faviconUrl = faviconSource && !faviconFailed ? faviconSource : undefined
 
   return (
     <article className="service-card">
@@ -55,6 +61,23 @@ function ServiceCard({ service }: ServiceCardProps) {
 
         <span className="badge shrink-0">{service.status_code}</span>
       </div>
+
+      {services.length > 1 ? (
+        <div className="mt-5 flex flex-wrap gap-2">
+          {services.map((endpoint) => (
+            <a
+              key={endpoint.id}
+              href={endpoint.display_url}
+              target="_blank"
+              rel="noreferrer"
+              className={`endpoint-chip ${endpoint.id === service.id ? 'endpoint-chip-primary' : ''}`}
+              title={endpoint.display_url}
+            >
+              {endpoint.protocol.toUpperCase()} :{endpoint.port}
+            </a>
+          ))}
+        </div>
+      ) : null}
 
       <dl className="mt-6 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
         <div className="metric-box">

@@ -120,6 +120,7 @@ Localdeck currently:
 - extracts HTML titles
 - resolves basic favicons
 - falls back to a title initial when favicon loading fails
+- groups multiple endpoints for the same detected service in one card
 - stores only the latest snapshot in memory
 - supports manual rescans from the UI
 
