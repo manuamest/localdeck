@@ -1,8 +1,28 @@
 from datetime import UTC, datetime
 
 from app.config import Settings
+from app.models import ServiceRecord
 from app.scanner.probe import HttpProbeResult
-from app.scanner.scan import service_from_probe
+from app.scanner.scan import deduplicate_services, service_from_probe
+
+
+def make_service(title: str, port: int, protocol: str = "http") -> ServiceRecord:
+    checked_at = datetime(2026, 6, 11, 12, 0, tzinfo=UTC)
+    return ServiceRecord(
+        id=f"{protocol}-host.docker.internal-{port}",
+        title=title,
+        url=f"{protocol}://host.docker.internal:{port}",
+        display_url=f"{protocol}://localhost:{port}",
+        host="host.docker.internal",
+        port=port,
+        protocol=protocol,
+        status_code=200,
+        response_time_ms=10,
+        favicon_url=None,
+        last_seen=checked_at,
+        last_checked=checked_at,
+        error=None,
+    )
 
 
 def test_service_from_probe_builds_service_record_with_title_and_favicon() -> None:
@@ -87,3 +107,56 @@ def test_service_from_probe_builds_https_service_record() -> None:
     assert service.url == "https://host.docker.internal:9443"
     assert service.display_url == "https://localhost:9443"
     assert service.protocol == "https"
+
+
+def test_deduplicate_services_prefers_https_for_same_host_and_title() -> None:
+    services = [
+        make_service("Portainer", 9000, "http"),
+        make_service("Portainer", 9443, "https"),
+    ]
+
+    deduplicated = deduplicate_services(services)
+
+    assert [service.id for service in deduplicated] == ["https-host.docker.internal-9443"]
+
+
+def test_deduplicate_services_keeps_different_titles() -> None:
+    services = [
+        make_service("Adminer", 8081, "http"),
+        make_service("Portainer", 9443, "https"),
+    ]
+
+    deduplicated = deduplicate_services(services)
+
+    assert [service.id for service in deduplicated] == [
+        "http-host.docker.internal-8081",
+        "https-host.docker.internal-9443",
+    ]
+
+
+def test_deduplicate_services_keeps_same_title_http_services_without_https() -> None:
+    services = [
+        make_service("Dev App", 3000, "http"),
+        make_service("Dev App", 3001, "http"),
+    ]
+
+    deduplicated = deduplicate_services(services)
+
+    assert [service.id for service in deduplicated] == [
+        "http-host.docker.internal-3000",
+        "http-host.docker.internal-3001",
+    ]
+
+
+def test_deduplicate_services_keeps_generic_port_titles() -> None:
+    services = [
+        make_service("Service on port 8000", 8000, "http"),
+        make_service("Service on port 9443", 9443, "https"),
+    ]
+
+    deduplicated = deduplicate_services(services)
+
+    assert [service.id for service in deduplicated] == [
+        "http-host.docker.internal-8000",
+        "https-host.docker.internal-9443",
+    ]

@@ -33,6 +33,35 @@ def service_from_probe(settings: Settings, port: int, result: HttpProbeResult, c
     )
 
 
+def deduplicate_services(services: list[ServiceRecord]) -> list[ServiceRecord]:
+    grouped: dict[tuple[str, str], list[ServiceRecord]] = {}
+    entries: list[ServiceRecord | tuple[str, str]] = []
+
+    for service in services:
+        title_key = service.title.strip().casefold()
+        if not title_key or title_key.startswith("service on port "):
+            entries.append(service)
+            continue
+
+        key = (service.host, title_key)
+        if key not in grouped:
+            grouped[key] = []
+            entries.append(key)
+        grouped[key].append(service)
+
+    deduplicated: list[ServiceRecord] = []
+    for entry in entries:
+        if isinstance(entry, ServiceRecord):
+            deduplicated.append(entry)
+            continue
+
+        group = grouped[entry]
+        https_services = [service for service in group if service.protocol == "https"]
+        deduplicated.extend(https_services or group)
+
+    return deduplicated
+
+
 async def scan_services(settings: Settings) -> tuple[datetime, list[ServiceRecord]]:
     checked_at = datetime.now(UTC)
     ports = [port for port in parse_scan_ports(settings.scan_ports) if port != settings.port]
@@ -47,7 +76,7 @@ async def scan_services(settings: Settings) -> tuple[datetime, list[ServiceRecor
         for port, result in zip(ports, results, strict=True)
         if result is not None
     ]
-    return checked_at, services
+    return checked_at, deduplicate_services(services)
 
 
 async def scan_loop(settings: Settings, registry: ServiceRegistry) -> None:
