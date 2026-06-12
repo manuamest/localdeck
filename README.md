@@ -76,10 +76,10 @@ docker run --rm \
 v0.1 scans this default list:
 
 ```text
-3000,3001,4173,4200,5000,5050,5173,5500,6274,7000,7860,8000,8001,8080,8081,8888,9000,9443,11434
+3000,3001,4173,4200,5000,5050,5173,5500,6274,7000,7860,8000-8010,8080-8084,8888,9000,9443,11434
 ```
 
-The list includes common dev servers plus frequent local Docker UI ports such as pgAdmin `5050`, Adminer `8081`, Portainer `9000` and Portainer HTTPS `9443`.
+The list includes common dev servers plus frequent local Docker UI ports such as pgAdmin `5050`, Adminer `8081`, File Browser `8082`, Dozzle `8083`, IT Tools `8084`, Portainer `9000`, Portainer HTTPS `9443`, and local app ranges like `8000-8010`.
 
 If your apps run on other ports, pass `LOCALDECK_SCAN_PORTS`:
 
@@ -87,7 +87,7 @@ If your apps run on other ports, pass `LOCALDECK_SCAN_PORTS`:
 docker run --rm \
   --add-host=host.docker.internal:host-gateway \
   -p 4888:4888 \
-  -e LOCALDECK_SCAN_PORTS=8081,9000,5050 \
+  -e LOCALDECK_SCAN_PORTS=8000-8010,8081,9000,5050 \
   localdeck:dev
 ```
 
@@ -95,7 +95,7 @@ For Docker Compose, edit `docker-compose.yml`:
 
 ```yaml
 environment:
-  LOCALDECK_SCAN_PORTS: 8081,9000,5050
+  LOCALDECK_SCAN_PORTS: 8000-8010,8081,9000,5050
 ```
 
 ## Environment Variables
@@ -104,7 +104,7 @@ environment:
 |---|---:|---|
 | `LOCALDECK_HOST` | `host.docker.internal` | Local/private host scanned from inside the container |
 | `LOCALDECK_PORT` | `4888` | Port used by Localdeck itself |
-| `LOCALDECK_SCAN_PORTS` | common dev ports | Comma-separated ports to scan |
+| `LOCALDECK_SCAN_PORTS` | common dev ports | Comma-separated ports and simple ranges to scan |
 | `LOCALDECK_SCAN_INTERVAL` | `10` | Scan interval in seconds |
 | `LOCALDECK_REQUEST_TIMEOUT` | `2` | HTTP request timeout in seconds |
 

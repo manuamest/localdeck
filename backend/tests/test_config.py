@@ -21,7 +21,7 @@ def test_get_settings_default_ports_include_common_docker_ui_ports(monkeypatch: 
 
     ports = set(get_settings().scan_ports.split(","))
 
-    assert {"5050", "8081", "9443"}.issubset(ports)
+    assert {"5050", "8000-8010", "8080-8084", "9443"}.issubset(ports)
 
 
 def test_get_settings_allows_localhost(monkeypatch: pytest.MonkeyPatch) -> None:
