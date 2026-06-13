@@ -73,7 +73,7 @@ docker run --rm \
 
 ## Scan Custom Ports
 
-v0.1 scans this default list:
+Localdeck scans this default list:
 
 ```text
 3000,3001,4173,4200,5000,5050,5173,5500,6274,7000,7860,8000-8010,8080-8084,8888,9000,9443,11434
@@ -118,16 +118,18 @@ Localdeck currently:
 - follows safe same-protocol local redirects
 - ignores Localdeck's own port
 - extracts HTML titles
-- resolves basic favicons
+- resolves common favicon links, including `icon`, `shortcut icon`, and `apple-touch-icon`
 - falls back to a title initial when favicon loading fails
 - groups multiple endpoints for the same detected service in one card
+- filters the current view by inferred type, such as Docker/tools, Python, React/JS, ML apps, and Other
+- sorts the current view by port, title, or response time
+- keeps the last valid snapshot if a scan fails
 - stores only the latest snapshot in memory
 - supports manual rescans from the UI
 
 Not included yet:
 
 - Docker socket discovery
-- port ranges like `3000-3010`
 - persistent settings
 - history
 - authentication

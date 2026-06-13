@@ -58,6 +58,42 @@ select {
   backdrop-filter: blur(18px) saturate(150%);
 }
 
+.tool-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tool-select-label {
+  display: grid;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tool-select-label select {
+  min-height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-soft);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 7px 30px 7px 10px;
+  text-transform: none;
+}
+
+.tool-select-label option {
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+}
+
 .tool-btn-primary {
   min-height: 38px;
   border: 1px solid rgba(97, 175, 239, 0.28);
@@ -118,32 +154,6 @@ select {
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
 }
 
-.metric-box {
-  min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.045);
-  padding: 10px;
-}
-
-.metric-box dt {
-  color: var(--color-text-muted);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.metric-box dd {
-  margin-top: 4px;
-  overflow: hidden;
-  color: var(--color-text-soft);
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .badge {
   display: inline-flex;
   min-height: 32px;
@@ -196,5 +206,14 @@ select {
 @media (max-width: 680px) {
   .command-deck {
     width: calc(100vw - 20px);
+    grid-template-columns: 1fr;
+  }
+
+  .command-deck img {
+    justify-self: center;
+  }
+
+  .tool-controls {
+    justify-content: center;
   }
 }

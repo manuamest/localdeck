@@ -6,15 +6,6 @@ type ServiceCardProps = {
   services: ServiceRecord[]
 }
 
-function formatCheckedAt(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).format(new Date(value))
-}
-
-
 function getInitial(title: string) {
   return title.trim().charAt(0).toUpperCase() || '?'
 }
@@ -79,24 +70,6 @@ function ServiceCard({ services }: ServiceCardProps) {
         </div>
       ) : null}
 
-      <dl className="mt-6 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-        <div className="metric-box">
-          <dt>Port</dt>
-          <dd>{service.port}</dd>
-        </div>
-        <div className="metric-box">
-          <dt>Protocol</dt>
-          <dd>{service.protocol.toUpperCase()}</dd>
-        </div>
-        <div className="metric-box">
-          <dt>Response</dt>
-          <dd>{service.response_time_ms}ms</dd>
-        </div>
-        <div className="metric-box">
-          <dt>Checked</dt>
-          <dd>{formatCheckedAt(service.last_checked)}</dd>
-        </div>
-      </dl>
     </article>
   )
 }

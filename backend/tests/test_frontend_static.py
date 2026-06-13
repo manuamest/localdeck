@@ -34,6 +34,7 @@ def test_register_frontend_serves_favicon_when_dist_exists(tmp_path: Path) -> No
     assert response.status_code == 200
     assert response.text == "<svg></svg>"
     assert response.headers["content-type"].startswith("image/svg+xml")
+    assert response.headers["cache-control"] == "no-cache"
 
 
 def test_register_frontend_skips_missing_dist(tmp_path: Path) -> None:

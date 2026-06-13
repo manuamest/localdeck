@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
             await app.state.scan_task
 
 
-app = FastAPI(title="Localdeck", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Localdeck", version="0.3.0", lifespan=lifespan)
 app.state.settings = get_settings()
 app.state.registry = ServiceRegistry(scan_interval=app.state.settings.scan_interval)
 
@@ -53,7 +53,11 @@ def register_frontend(app: FastAPI, dist_dir: Path = FRONTEND_DIST) -> None:
     @app.get("/favicon.svg")
     @app.head("/favicon.svg")
     async def frontend_favicon() -> FileResponse:
-        return FileResponse(dist_dir / "favicon.svg", media_type="image/svg+xml")
+        return FileResponse(
+            dist_dir / "favicon.svg",
+            media_type="image/svg+xml",
+            headers={"Cache-Control": "no-cache"},
+        )
 
     @app.get("/{path:path}", response_class=HTMLResponse)
     async def frontend_fallback(path: str) -> str:
