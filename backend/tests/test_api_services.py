@@ -36,3 +36,24 @@ def test_scan_endpoint_updates_snapshot_for_empty_scan() -> None:
     finally:
         app.state.settings = original_settings
         app.state.registry = original_registry
+
+
+def test_scan_endpoint_keeps_api_available_when_scan_fails() -> None:
+    original_settings = app.state.settings
+    original_registry = app.state.registry
+    try:
+        app.state.settings = Settings(host="localhost", port=4888, scan_ports="bad-port")
+        app.state.registry = ServiceRegistry(scan_interval=10)
+        client = TestClient(app)
+
+        response = client.post("/api/scan")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "scanned_at": None,
+            "scan_interval": 10,
+            "services": [],
+        }
+    finally:
+        app.state.settings = original_settings
+        app.state.registry = original_registry

@@ -1,8 +1,9 @@
 from datetime import UTC, datetime
 
 from app.config import Settings
+from app.registry import ServiceRegistry
 from app.scanner.probe import HttpProbeResult
-from app.scanner.scan import service_from_probe
+from app.scanner.scan import scan_once, service_from_probe
 
 
 def test_service_from_probe_builds_service_record_with_title_and_favicon() -> None:
@@ -87,3 +88,14 @@ def test_service_from_probe_builds_https_service_record() -> None:
     assert service.url == "https://host.docker.internal:9443"
     assert service.display_url == "https://localhost:9443"
     assert service.protocol == "https"
+
+
+async def test_scan_once_preserves_snapshot_when_scan_fails() -> None:
+    registry = ServiceRegistry(scan_interval=10)
+    settings = Settings(host="localhost", port=4888, scan_ports="bad-port")
+
+    success = await scan_once(settings, registry)
+
+    assert success is False
+    assert registry.snapshot().scanned_at is None
+    assert registry.snapshot().services == []

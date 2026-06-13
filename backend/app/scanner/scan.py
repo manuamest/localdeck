@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import UTC, datetime
 
 import httpx
@@ -9,6 +10,8 @@ from app.registry import ServiceRegistry
 from app.scanner.html import extract_favicon_url, extract_title
 from app.scanner.ports import parse_scan_ports
 from app.scanner.probe import HttpProbeResult, probe_http_or_https
+
+logger = logging.getLogger(__name__)
 
 
 def service_from_probe(settings: Settings, port: int, result: HttpProbeResult, checked_at: datetime) -> ServiceRecord:
@@ -52,11 +55,16 @@ async def scan_services(settings: Settings) -> tuple[datetime, list[ServiceRecor
 
 async def scan_loop(settings: Settings, registry: ServiceRegistry) -> None:
     while True:
-        scanned_at, services = await scan_services(settings)
-        registry.replace(services, scanned_at)
+        await scan_once(settings, registry)
         await asyncio.sleep(settings.scan_interval)
 
 
-async def scan_once(settings: Settings, registry: ServiceRegistry) -> None:
-    scanned_at, services = await scan_services(settings)
+async def scan_once(settings: Settings, registry: ServiceRegistry) -> bool:
+    try:
+        scanned_at, services = await scan_services(settings)
+    except Exception:
+        logger.exception("Localdeck scan failed")
+        return False
+
     registry.replace(services, scanned_at)
+    return True
