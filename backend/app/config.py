@@ -19,6 +19,7 @@ class Settings:
     scan_ports: str = DEFAULT_SCAN_PORTS
     scan_interval: int = 10
     request_timeout: float = 2.0
+    docker_socket: str = "/var/run/docker.sock"
 
 
 def _get_int(name: str, default: int) -> int:
@@ -37,18 +38,25 @@ def _get_float(name: str, default: float) -> float:
 
 def _get_host() -> str:
     host = os.getenv("LOCALDECK_HOST", "host.docker.internal")
-    if host in ALLOWED_LOCAL_HOSTNAMES:
-        return host
-
-    try:
-        parsed = ip_address(host)
-    except ValueError as error:
-        raise ValueError(f"LOCALDECK_HOST must be local or private: {host}") from error
-
-    if parsed.is_loopback or parsed.is_private or parsed.is_link_local:
+    if is_allowed_local_host(host):
         return host
 
     raise ValueError(f"LOCALDECK_HOST must be local or private: {host}")
+
+
+def is_allowed_local_host(host: str) -> bool:
+    if host in ALLOWED_LOCAL_HOSTNAMES:
+        return True
+
+    try:
+        parsed = ip_address(host)
+    except ValueError:
+        return False
+
+    if parsed.is_loopback or parsed.is_private or parsed.is_link_local:
+        return True
+
+    return False
 
 
 @lru_cache(maxsize=1)
@@ -59,4 +67,5 @@ def get_settings() -> Settings:
         scan_ports=os.getenv("LOCALDECK_SCAN_PORTS", DEFAULT_SCAN_PORTS),
         scan_interval=_get_int("LOCALDECK_SCAN_INTERVAL", 10),
         request_timeout=_get_float("LOCALDECK_REQUEST_TIMEOUT", 2.0),
+        docker_socket=os.getenv("LOCALDECK_DOCKER_SOCKET", "/var/run/docker.sock"),
     )

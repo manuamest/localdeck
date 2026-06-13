@@ -10,52 +10,28 @@ const pollIntervalMs = 10_000
 type TypeFilter = 'all' | 'docker' | 'python' | 'react' | 'ml' | 'other'
 type SortMode = 'port' | 'title' | 'response'
 
+const typeFilters: Array<{ value: TypeFilter; label: string }> = [
+  { value: 'all', label: 'All' },
+  { value: 'react', label: 'JavaScript' },
+  { value: 'python', label: 'Python' },
+  { value: 'docker', label: 'Docker' },
+  { value: 'ml', label: 'ML' },
+  { value: 'other', label: 'Other' },
+]
+
+const sortModes: Array<{ value: SortMode; label: string }> = [
+  { value: 'port', label: 'Port' },
+  { value: 'title', label: 'Name' },
+  { value: 'response', label: 'Fastest' },
+]
+
 function getServiceType(service: ServiceRecord): Exclude<TypeFilter, 'all'> {
-  const title = service.title.toLowerCase()
-
-  if (
-    title.includes('portainer') ||
-    title.includes('pgadmin') ||
-    title.includes('adminer') ||
-    title.includes('dozzle') ||
-    title.includes('file browser') ||
-    title.includes('it tools')
-  ) {
-    return 'docker'
-  }
-
-  if (
-    title.includes('fastapi') ||
-    title.includes('flask') ||
-    title.includes('django') ||
-    title.includes('uvicorn') ||
-    title.includes('python') ||
-    service.port === 8000 ||
-    service.port === 8001
-  ) {
-    return 'python'
-  }
-
-  if (
-    title.includes('react') ||
-    title.includes('vite') ||
-    title.includes('next.js') ||
-    title.includes('nextjs') ||
-    title.includes('vue') ||
-    title.includes('svelte') ||
-    [3000, 3001, 4173, 4200, 5173, 5500].includes(service.port)
-  ) {
+  if (service.runtime_hint === 'javascript') {
     return 'react'
   }
 
-  if (
-    title.includes('streamlit') ||
-    title.includes('gradio') ||
-    title.includes('ollama') ||
-    title.includes('langflow') ||
-    [7860, 8501, 11434].includes(service.port)
-  ) {
-    return 'ml'
+  if (service.runtime_hint === 'python' || service.runtime_hint === 'docker' || service.runtime_hint === 'ml') {
+    return service.runtime_hint
   }
 
   return 'other'
@@ -134,32 +110,65 @@ function App() {
     <main className="min-h-screen bg-[var(--gradient-bg)] px-4 py-5 font-tool text-[var(--color-text)] sm:px-6 lg:px-8">
       <section className="mx-auto flex min-h-[calc(100vh-40px)] w-full max-w-7xl flex-col gap-6">
         <header className="command-deck">
-          <img src="/favicon.svg?v=0.3.0" alt="Localdeck" className="h-11 w-11 rounded-2xl" />
+          <div className="brand-lockup">
+            <img src="/favicon.svg?v=1.0.0" alt="" className="h-11 w-11 rounded-2xl" />
+            <div>
+              <p className="brand-kicker">Localdeck</p>
+              <h1 className="brand-title">Local apps running now</h1>
+            </div>
+          </div>
 
           <div className="tool-controls">
-            <label className="tool-select-label">
-              Type
-              <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)}>
-                <option value="all">All</option>
-                <option value="docker">Docker/tools</option>
-                <option value="python">Python</option>
-                <option value="react">React/JS</option>
-                <option value="ml">ML apps</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
+            <div className="tool-group" aria-label="Filter by app type">
+              {typeFilters.map((filter) => (
+                <button
+                  key={filter.value}
+                  className={`tool-chip ${typeFilter === filter.value ? 'tool-chip-active' : ''}`}
+                  type="button"
+                  onClick={() => setTypeFilter(filter.value)}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
 
-            <label className="tool-select-label">
-              Sort
-              <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)}>
-                <option value="port">Port</option>
-                <option value="title">Title</option>
-                <option value="response">Response</option>
-              </select>
-            </label>
+            <div className="tool-group tool-group-quiet" aria-label="Order services">
+              {sortModes.map((mode) => (
+                <button
+                  key={mode.value}
+                  className={`tool-chip ${sortMode === mode.value ? 'tool-chip-active' : ''}`}
+                  type="button"
+                  onClick={() => setSortMode(mode.value)}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
 
-            <button className="tool-btn-primary" type="button" onClick={handleRescan} disabled={isRescanning}>
-              {isRescanning ? 'Scanning...' : 'Rescan'}
+            <button
+              className="tool-btn-icon"
+              type="button"
+              onClick={handleRescan}
+              disabled={isRescanning}
+              aria-label="Rescan localhost"
+              title="Rescan localhost"
+            >
+              <svg
+                className={isRescanning ? 'animate-spin' : ''}
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M20 12a8 8 0 0 1-13.66 5.66M4 12A8 8 0 0 1 17.66 6.34M17 2v5h5M7 22v-5H2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
           </div>
         </header>

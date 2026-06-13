@@ -1,171 +1,62 @@
+<div align="center">
+
+<a href="https://github.com/manuamest/Localdeck">
+<img src="./favicon.svg" alt="Localdeck Logo" width="100" type="image/svg+xml"/>
+</a>
+
 # Localdeck
 
-Localdeck is a zero-config local dashboard that answers one question:
+**Zero-config local dashboard for developers.**
 
-> What web applications are currently running on my localhost?
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-It runs in Docker, scans common local development ports, probes HTTP services, extracts a title/favicon, and shows the current live services as visual cards.
+</div>
 
-Localdeck is intentionally small and ephemeral. If it restarts, it can forget everything.
+Localdeck answers one question: what web applications are currently running on your localhost? It scans common development ports, probes HTTP services, and shows live services as visual cards — no config required.
 
-## What It Is Not
+## How it works
 
-Localdeck is not:
+1. Run `docker compose up --build` in the project root.
+2. Open `http://localhost:4888` in your browser.
+3. Localdeck automatically scans common dev ports, detects running services, and displays them as cards with title, favicon, and runtime classification.
+4. Filter by type, sort by port/title/response time, or trigger a manual rescan — all from the UI.
 
-- a configurable dashboard like Homepage or Dashy
-- a Docker manager like Portainer
-- an observability platform like Grafana
-- an uptime monitor like Uptime Kuma
-- a bookmark manager
-- a favorites system
-- a multi-user SaaS product
+That's it. Zero configuration needed.
 
-There is no database, no persistence, no authentication, and no user system.
+## Features
 
-## Quickstart
+- **Zero-Config Discovery:** Detects local web apps instantly — Docker, Docker Compose, Python, Node.js, and more.
+- **Rich Service Cards:** Shows title, favicon, framework classification, and detected endpoints for each service.
+- **Smart Filtering & Sorting:** Filter by runtime type (JavaScript, Python, Docker, ML, Other) and sort by port, title, or response time.
+- **Docker Metadata Enrichment:** Mount the Docker socket (read-only) for container and Compose project metadata.
+- **Privacy First:** Scans only local/private hosts. No external network access. No data leaves your machine.
+- **Ephemeral by Design:** Stateless and disposable. Restart and it starts fresh.
 
-Build and run with Docker Compose:
+## Contributing
 
-```bash
-docker compose up --build
-```
+Contributions are welcome! Feel free to open issues or pull requests.
 
-Open:
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-```text
-http://localhost:4888
-```
+## License
 
-Healthcheck:
+This project is open-source and licensed under the MIT License.
 
-```text
-http://localhost:4888/health
-```
+<div align="center">
 
-Services API:
+## Support
 
-```text
-http://localhost:4888/api/services
-```
+If you find Localdeck useful, consider supporting the project:
 
-## Docker Run
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-support-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=000000)](https://www.buymeacoffee.com/manuamest)
 
-Build the image:
-
-```bash
-docker build -t localdeck:dev .
-```
-
-Run it:
-
-```bash
-docker run --rm -p 4888:4888 localdeck:dev
-```
-
-On Linux, include `host-gateway` so the container can reach services published on the host:
-
-```bash
-docker run --rm \
-  --add-host=host.docker.internal:host-gateway \
-  -p 4888:4888 \
-  localdeck:dev
-```
-
-## Scan Custom Ports
-
-Localdeck scans this default list:
-
-```text
-3000,3001,4173,4200,5000,5050,5173,5500,6274,7000,7860,8000-8010,8080-8084,8888,9000,9443,11434
-```
-
-The list includes common dev servers plus frequent local Docker UI ports such as pgAdmin `5050`, Adminer `8081`, File Browser `8082`, Dozzle `8083`, IT Tools `8084`, Portainer `9000`, Portainer HTTPS `9443`, and local app ranges like `8000-8010`.
-
-If your apps run on other ports, pass `LOCALDECK_SCAN_PORTS`:
-
-```bash
-docker run --rm \
-  --add-host=host.docker.internal:host-gateway \
-  -p 4888:4888 \
-  -e LOCALDECK_SCAN_PORTS=8000-8010,8081,9000,5050 \
-  localdeck:dev
-```
-
-For Docker Compose, edit `docker-compose.yml`:
-
-```yaml
-environment:
-  LOCALDECK_SCAN_PORTS: 8000-8010,8081,9000,5050
-```
-
-## Environment Variables
-
-| Variable | Default | Description |
-|---|---:|---|
-| `LOCALDECK_HOST` | `host.docker.internal` | Local/private host scanned from inside the container |
-| `LOCALDECK_PORT` | `4888` | Port used by Localdeck itself |
-| `LOCALDECK_SCAN_PORTS` | common dev ports | Comma-separated ports and simple ranges to scan |
-| `LOCALDECK_SCAN_INTERVAL` | `10` | Scan interval in seconds |
-| `LOCALDECK_REQUEST_TIMEOUT` | `2` | HTTP request timeout in seconds |
-
-## Current Behavior
-
-Localdeck currently:
-
-- only allows local/private scan hosts
-- scans explicit HTTP/HTTPS ports
-- tries HTTP first, then HTTPS when HTTP does not respond
-- follows safe same-protocol local redirects
-- ignores Localdeck's own port
-- extracts HTML titles
-- resolves common favicon links, including `icon`, `shortcut icon`, and `apple-touch-icon`
-- falls back to a title initial when favicon loading fails
-- groups multiple endpoints for the same detected service in one card
-- filters the current view by inferred type, such as Docker/tools, Python, React/JS, ML apps, and Other
-- sorts the current view by port, title, or response time
-- keeps the last valid snapshot if a scan fails
-- stores only the latest snapshot in memory
-- supports manual rescans from the UI
-
-Not included yet:
-
-- Docker socket discovery
-- persistent settings
-- history
-- authentication
-- favorites
-
-## Linux Notes
-
-Inside Docker, `localhost` points to the container, not the host. Localdeck defaults to scanning `host.docker.internal`.
-
-On Linux, Docker needs this mapping:
-
-```yaml
-extra_hosts:
-  - "host.docker.internal:host-gateway"
-```
-
-The included `docker-compose.yml` already contains it.
-
-## Development
-
-Backend:
-
-```bash
-cd backend
-python -m pip install -e ".[test]"
-pytest
-uvicorn app.main:app --host 0.0.0.0 --port 4888
-```
-
-Frontend:
-
-```bash
-cd frontend
-npm install
-npm run dev
-npm run build
-```
-
-During frontend development, Vite proxies `/api` and `/health` to `http://localhost:4888`.
+</div>

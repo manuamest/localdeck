@@ -43,9 +43,9 @@ select {
 
 .command-deck {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(230px, auto) 1fr;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   width: min(1320px, calc(100vw - 32px));
   margin: 0 auto;
   padding: 8px;
@@ -58,70 +58,106 @@ select {
   backdrop-filter: blur(18px) saturate(150%);
 }
 
+.brand-lockup {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-kicker {
+  color: var(--color-cyan);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.brand-title {
+  margin-top: 4px;
+  color: white;
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
 .tool-controls {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
-.tool-select-label {
-  display: grid;
+.tool-group {
+  display: inline-flex;
+  flex-wrap: wrap;
   gap: 4px;
-  color: var(--color-text-muted);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 4px;
 }
 
-.tool-select-label select {
-  min-height: 38px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
+.tool-group-quiet {
+  background: rgba(2, 8, 18, 0.2);
+}
+
+.tool-chip {
+  min-height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
   color: var(--color-text-soft);
   cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  padding: 7px 30px 7px 10px;
-  text-transform: none;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 6px 10px;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
 }
 
-.tool-select-label option {
-  background: var(--color-bg-raised);
-  color: var(--color-text);
+.tool-chip:hover {
+  transform: translateY(-1px);
+  color: white;
 }
 
-.tool-btn-primary {
-  min-height: 38px;
+.tool-chip-active {
+  background: linear-gradient(135deg, rgba(97, 175, 239, 0.26), rgba(0, 242, 254, 0.12));
+  color: var(--color-cyan);
+}
+
+.tool-btn-icon {
+  display: inline-grid;
+  min-height: 40px;
+  width: 40px;
+  place-items: center;
   border: 1px solid rgba(97, 175, 239, 0.28);
-  border-radius: 10px;
+  border-radius: 999px;
   background: linear-gradient(135deg, rgba(97, 175, 239, 0.26), rgba(0, 242, 254, 0.14));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 22px rgba(42, 122, 186, 0.14);
   color: var(--color-cyan);
   cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  padding: 8px 12px;
+  padding: 0;
   transition:
     transform 0.16s ease,
     border-color 0.16s ease,
     opacity 0.16s ease;
 }
 
-.tool-btn-primary:hover:not(:disabled) {
+.tool-btn-icon:hover:not(:disabled) {
   transform: translateY(-1px);
   border-color: rgba(97, 175, 239, 0.45);
 }
 
-.tool-btn-primary:active:not(:disabled) {
+.tool-btn-icon:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.tool-btn-primary:disabled {
+.tool-btn-icon:disabled {
   cursor: wait;
   opacity: 0.6;
 }
@@ -142,6 +178,7 @@ select {
   background: var(--gradient-card);
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(10px);
+  cursor: pointer;
   transition:
     transform 0.16s ease,
     box-shadow 0.16s ease,
@@ -165,6 +202,25 @@ select {
   color: var(--color-accent-soft);
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.type-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(97, 175, 239, 0.2);
+  border-radius: 999px;
+  background: rgba(97, 175, 239, 0.08);
+  color: var(--color-cyan);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 9px;
+  text-transform: capitalize;
+}
+
+.type-pill-soft {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--color-text-muted);
 }
 
 .endpoint-chip {
@@ -199,7 +255,7 @@ select {
 
 @media (min-width: 640px) {
   .command-deck {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: minmax(230px, auto) 1fr;
   }
 }
 
@@ -209,7 +265,7 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .command-deck img {
+  .brand-lockup {
     justify-self: center;
   }
 

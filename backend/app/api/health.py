@@ -8,5 +8,5 @@ async def health() -> dict[str, str]:
     return {
         "status": "ok",
         "app": "localdeck",
-        "version": "0.3.0",
+        "version": "1.0.0",
     }

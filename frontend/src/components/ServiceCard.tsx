@@ -14,6 +14,18 @@ function getPrimaryService(services: ServiceRecord[]) {
   return services.find((service) => service.protocol === 'http') ?? services[0]
 }
 
+function formatHint(value: string) {
+  if (value === 'unknown') {
+    return null
+  }
+
+  return value.replaceAll('_', ' ')
+}
+
+function openService(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
 function ServiceCard({ services }: ServiceCardProps) {
   const service = getPrimaryService(services)
   const faviconSource = services.find((candidate) => candidate.favicon_url)?.favicon_url ?? null
@@ -21,7 +33,27 @@ function ServiceCard({ services }: ServiceCardProps) {
   const faviconUrl = faviconSource && !faviconFailed ? faviconSource : undefined
 
   return (
-    <article className="service-card">
+    <article
+      className="service-card"
+      role="link"
+      tabIndex={0}
+      aria-label={`Open ${service.title}`}
+      onClick={(event) => {
+        if (event.target instanceof Element && event.target.closest('a')) {
+          return
+        }
+
+        openService(service.display_url)
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+          return
+        }
+
+        event.preventDefault()
+        openService(service.display_url)
+      }}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-[var(--border-card)] bg-white/[0.045]">
@@ -53,6 +85,11 @@ function ServiceCard({ services }: ServiceCardProps) {
         <span className="badge shrink-0">{service.status_code}</span>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2">
+        {formatHint(service.runtime_hint) ? <span className="type-pill">{formatHint(service.runtime_hint)}</span> : null}
+        {formatHint(service.framework_hint) ? <span className="type-pill type-pill-soft">{formatHint(service.framework_hint)}</span> : null}
+      </div>
+
       {services.length > 1 ? (
         <div className="mt-5 flex flex-wrap gap-2">
           {services.map((endpoint) => (
@@ -69,7 +106,6 @@ function ServiceCard({ services }: ServiceCardProps) {
           ))}
         </div>
       ) : null}
-
     </article>
   )
 }

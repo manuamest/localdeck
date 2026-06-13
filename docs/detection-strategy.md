@@ -9,11 +9,11 @@ Use read-only signals where possible:
 - HTTP probing of local URLs
 - HTML titles
 - common favicon links
+- optional Docker container port mappings
+- optional Docker Compose labels
 
 Planned later sources:
 
-- Docker container port bindings
-- Docker Compose labels and project names
 - response headers
 - known framework default ports and response patterns
 - process metadata only when safely available from the execution environment
@@ -27,8 +27,10 @@ Planned later sources:
 5. Follow safe same-protocol same-host redirects, up to a small limit.
 6. Ignore ports that do not produce an HTTP or HTTPS response.
 7. Extract title and favicon metadata from the response body.
-8. Replace the in-memory service snapshot after a successful scan.
-9. If a scan fails unexpectedly, log the error and keep the previous valid snapshot.
+8. Enrich HTTP-confirmed services with optional Docker/Compose metadata by matching published ports.
+9. Classify services into source, runtime, framework, confidence, and evidence hints.
+10. Replace the in-memory service snapshot after a successful scan.
+11. If a scan fails unexpectedly, log the error and keep the previous valid snapshot.
 
 ## Candidate Signals
 

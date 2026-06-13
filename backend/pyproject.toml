@@ -1,6 +1,6 @@
 [project]
 name = "localdeck-backend"
-version = "0.3.0"
+version = "1.0.0"
 description = "Localdeck FastAPI backend"
 requires-python = ">=3.12"
 dependencies = [

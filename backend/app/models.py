@@ -14,6 +14,11 @@ class ServiceRecord(BaseModel):
     status_code: int = Field(ge=100, le=599)
     response_time_ms: int = Field(ge=0)
     favicon_url: str | None = None
+    source: str = "http_probe"
+    runtime_hint: str = "unknown"
+    framework_hint: str = "unknown"
+    confidence: float = Field(default=0.5, ge=0, le=1)
+    evidence: list[str] = Field(default_factory=list)
     last_seen: datetime
     last_checked: datetime
     error: str | None = None

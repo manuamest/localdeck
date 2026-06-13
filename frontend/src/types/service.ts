@@ -9,6 +9,11 @@ export type ServiceRecord = {
   status_code: number
   response_time_ms: number
   favicon_url: string | null
+  source: string
+  runtime_hint: string
+  framework_hint: string
+  confidence: number
+  evidence: string[]
   last_seen: string
   last_checked: string
   error: string | null

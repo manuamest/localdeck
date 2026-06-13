@@ -31,6 +31,12 @@ If Localdeck uses the Docker socket:
 - isolate Docker access in a small module
 - test that unsupported write operations are not present
 
+Current Docker metadata inspection is optional and limited to `GET /containers/json` against a mounted socket. Localdeck does not call Docker write endpoints and does not exec into containers.
+
+## Favicon Proxy
+
+Localdeck proxies favicons only for local/private targets. It rejects external hosts, uses short timeouts, follows no redirects, requires image content types, and caps response size.
+
 ## Data Exposure
 
 Displayed metadata should be safe by default:

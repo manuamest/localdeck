@@ -8,6 +8,9 @@ Localdeck is a Dockerized FastAPI + React app. It keeps only the latest valid sc
 
 - Scanner: probes configured HTTP/HTTPS ports on `LOCALDECK_HOST`.
 - HTML parser: extracts titles and common favicon URLs.
+- Classifier: assigns source, runtime, framework, confidence, and evidence hints.
+- Docker metadata reader: optionally reads published port and Compose labels from a mounted Docker socket.
+- Favicon proxy: serves local favicons through Localdeck to avoid browser hostname and TLS issues.
 - Registry: stores the latest service snapshot in memory.
 - API: exposes health, services, and manual rescan endpoints.
 - Dashboard UI: displays live service cards, endpoint grouping, filters, sorting, and empty/loading/error states.
@@ -41,6 +44,11 @@ A detected service includes:
 - last seen timestamp
 - last checked timestamp
 - error field, currently unused for successful services
+- source
+- runtime hint
+- framework hint
+- confidence
+- evidence
 
 ## Design Constraints
 

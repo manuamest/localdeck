@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.api.favicon import router as favicon_router
 from app.api.health import router as health_router
 from app.api.services import router as services_router
 from app.config import get_settings
@@ -28,12 +29,13 @@ async def lifespan(app: FastAPI):
             await app.state.scan_task
 
 
-app = FastAPI(title="Localdeck", version="0.3.0", lifespan=lifespan)
+app = FastAPI(title="Localdeck", version="1.0.0", lifespan=lifespan)
 app.state.settings = get_settings()
 app.state.registry = ServiceRegistry(scan_interval=app.state.settings.scan_interval)
 
 app.include_router(health_router)
 app.include_router(services_router)
+app.include_router(favicon_router)
 
 
 def register_frontend(app: FastAPI, dist_dir: Path = FRONTEND_DIST) -> None:
