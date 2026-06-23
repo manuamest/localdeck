@@ -15,6 +15,7 @@ build/
 
 # Local tooling dependencies
 .opencode/node_modules/
+scripts/.videos/
 
 # Environment files
 .env
