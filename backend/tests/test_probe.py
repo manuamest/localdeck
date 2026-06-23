@@ -1,6 +1,6 @@
 import httpx
 
-from app.scanner.probe import probe_http, probe_http_or_https, probe_https
+from app.scanner.probe import probe_http_or_https, probe_url
 
 
 async def test_probe_http_returns_response_metadata() -> None:
@@ -10,7 +10,7 @@ async def test_probe_http_returns_response_metadata() -> None:
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
-        result = await probe_http("localhost", 8000, timeout=2, client=client)
+        result = await probe_url("http","localhost", 8000, timeout=2, client=client)
 
     assert result is not None
     assert result.url == "http://localhost:8000"
@@ -27,7 +27,7 @@ async def test_probe_http_returns_none_on_http_error() -> None:
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
-        result = await probe_http("localhost", 8000, timeout=2, client=client)
+        result = await probe_url("http","localhost", 8000, timeout=2, client=client)
 
     assert result is None
 
@@ -40,7 +40,7 @@ async def test_probe_http_follows_local_redirects() -> None:
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
-        result = await probe_http("localhost", 5050, timeout=2, client=client)
+        result = await probe_url("http","localhost", 5050, timeout=2, client=client)
 
     assert result is not None
     assert result.status_code == 200
@@ -53,7 +53,7 @@ async def test_probe_http_does_not_follow_external_redirects() -> None:
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
-        result = await probe_http("localhost", 5050, timeout=2, client=client)
+        result = await probe_url("http","localhost", 5050, timeout=2, client=client)
 
     assert result is not None
     assert result.status_code == 302
@@ -66,7 +66,7 @@ async def test_probe_https_returns_response_metadata() -> None:
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
-        result = await probe_https("localhost", 9443, timeout=2, client=client)
+        result = await probe_url("https","localhost", 9443, timeout=2, client=client)
 
     assert result is not None
     assert result.url == "https://localhost:9443"
@@ -124,7 +124,7 @@ async def test_probe_https_does_not_follow_http_redirects() -> None:
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
-        result = await probe_https("localhost", 9443, timeout=2, client=client)
+        result = await probe_url("https","localhost", 9443, timeout=2, client=client)
 
     assert result is not None
     assert result.status_code == 302

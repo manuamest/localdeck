@@ -4,7 +4,7 @@ from app.config import Settings
 from app.registry import ServiceRegistry
 from app.scanner.probe import HttpProbeResult
 from app.scanner.docker import DockerServiceMetadata
-from app.scanner.scan import proxied_favicon_url, scan_once, service_from_probe
+from app.scanner.scan import proxied_favicon_url, resolve_scan_ports, scan_once, service_from_probe
 
 
 def test_service_from_probe_builds_service_record_with_title_and_favicon() -> None:
@@ -103,6 +103,22 @@ async def test_scan_once_preserves_snapshot_when_scan_fails() -> None:
     assert success is False
     assert registry.snapshot().scanned_at is None
     assert registry.snapshot().services == []
+
+
+def test_resolve_scan_ports_expands_explicit_ports() -> None:
+    assert resolve_scan_ports("8000-8002,8080") == [8000, 8001, 8002, 8080]
+
+
+def test_resolve_scan_ports_auto_uses_listening_ports(monkeypatch) -> None:
+    monkeypatch.setattr("app.scanner.scan.discover_listening_ports", lambda: [9000, 9001])
+
+    assert resolve_scan_ports("auto") == [9000, 9001]
+
+
+def test_resolve_scan_ports_combines_auto_with_explicit_and_dedupes(monkeypatch) -> None:
+    monkeypatch.setattr("app.scanner.scan.discover_listening_ports", lambda: [9000, 9001])
+
+    assert resolve_scan_ports("auto,9001,3000") == [9000, 9001, 3000]
 
 
 def test_proxied_favicon_url_keeps_data_urls() -> None:

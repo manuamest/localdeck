@@ -24,3 +24,16 @@ export type ServicesResponse = {
   scan_interval: number
   services: ServiceRecord[]
 }
+
+export type PinnedService = {
+  id: string
+  name: string
+  url: string
+}
+
+export type Prefs = {
+  favorites: string[]
+  aliases: Record<string, string>
+  archived: string[]
+  pinned: PinnedService[]
+}

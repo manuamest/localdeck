@@ -253,6 +253,118 @@ select {
   color: var(--color-cyan);
 }
 
+.card-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition:
+    color 0.14s ease,
+    background 0.14s ease;
+}
+
+.card-icon-btn:hover {
+  color: var(--color-cyan);
+  background: rgba(97, 175, 239, 0.1);
+}
+
+.card-icon-btn-star-active {
+  color: #f4c555;
+}
+
+.card-icon-btn-star-active:hover {
+  color: #f4c555;
+  background: rgba(244, 197, 85, 0.12);
+}
+
+.badge-manual {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 14px;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.add-input {
+  min-height: 38px;
+  border: 1px solid var(--border-card);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  padding: 0 12px;
+  outline: none;
+  transition: border-color 0.16s ease;
+}
+
+.add-input:focus {
+  border-color: var(--border-accent);
+}
+
+.add-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.alias-input {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-accent);
+  border-radius: 0;
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  outline: none;
+  padding: 0 0 1px;
+  width: 100%;
+}
+
+.archived-section {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.archived-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 20px;
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.14s ease;
+  user-select: none;
+}
+
+.archived-summary:hover {
+  color: var(--color-text-soft);
+}
+
+.archived-summary::-webkit-details-marker {
+  display: none;
+}
+
+.archived-section[open] > .archived-summary {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
 @media (min-width: 640px) {
   .command-deck {
     grid-template-columns: minmax(230px, auto) 1fr;

@@ -6,10 +6,6 @@ export default {
       fontFamily: {
         tool: ['IBM Plex Sans', 'sans-serif'],
       },
-      colors: {
-        accent: '#4f85e5',
-        cyan: '#61afef',
-      },
     },
   },
   plugins: [],

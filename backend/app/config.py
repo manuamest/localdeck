@@ -22,20 +22,6 @@ class Settings:
     docker_socket: str = "/var/run/docker.sock"
 
 
-def _get_int(name: str, default: int) -> int:
-    value = os.getenv(name)
-    if value is None or value == "":
-        return default
-    return int(value)
-
-
-def _get_float(name: str, default: float) -> float:
-    value = os.getenv(name)
-    if value is None or value == "":
-        return default
-    return float(value)
-
-
 def _get_host() -> str:
     host = os.getenv("LOCALDECK_HOST", "host.docker.internal")
     if is_allowed_local_host(host):
@@ -63,9 +49,9 @@ def is_allowed_local_host(host: str) -> bool:
 def get_settings() -> Settings:
     return Settings(
         host=_get_host(),
-        port=_get_int("LOCALDECK_PORT", 4888),
+        port=int(os.getenv("LOCALDECK_PORT") or 4888),
         scan_ports=os.getenv("LOCALDECK_SCAN_PORTS", DEFAULT_SCAN_PORTS),
-        scan_interval=_get_int("LOCALDECK_SCAN_INTERVAL", 10),
-        request_timeout=_get_float("LOCALDECK_REQUEST_TIMEOUT", 2.0),
+        scan_interval=int(os.getenv("LOCALDECK_SCAN_INTERVAL") or 10),
+        request_timeout=float(os.getenv("LOCALDECK_REQUEST_TIMEOUT") or 2.0),
         docker_socket=os.getenv("LOCALDECK_DOCKER_SOCKET", "/var/run/docker.sock"),
     )

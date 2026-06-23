@@ -17,24 +17,6 @@ class HttpProbeResult:
     text: str
 
 
-async def probe_http(
-    host: str,
-    port: int,
-    timeout: float,
-    client: httpx.AsyncClient | None = None,
-) -> HttpProbeResult | None:
-    return await probe_url("http", host, port, timeout, client)
-
-
-async def probe_https(
-    host: str,
-    port: int,
-    timeout: float,
-    client: httpx.AsyncClient | None = None,
-) -> HttpProbeResult | None:
-    return await probe_url("https", host, port, timeout, client)
-
-
 async def probe_url(
     protocol: str,
     host: str,
@@ -74,11 +56,11 @@ async def probe_http_or_https(
     timeout: float,
     client: httpx.AsyncClient | None = None,
 ) -> HttpProbeResult | None:
-    http_result = await probe_http(host, port, timeout, client=client)
+    http_result = await probe_url("http", host, port, timeout, client)
     if http_result is not None and not _looks_like_https_required(http_result):
         return http_result
 
-    return await probe_https(host, port, timeout, client=client)
+    return await probe_url("https", host, port, timeout, client)
 
 
 def _looks_like_https_required(result: HttpProbeResult) -> bool:

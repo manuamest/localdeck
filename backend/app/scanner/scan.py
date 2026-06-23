@@ -11,6 +11,7 @@ from app.registry import ServiceRegistry
 from app.scanner.classify import classify_service
 from app.scanner.docker import DockerServiceMetadata, inspect_docker_services
 from app.scanner.html import extract_favicon_url, extract_title
+from app.scanner.listening import AUTO_TOKEN, discover_listening_ports
 from app.scanner.ports import parse_scan_ports
 from app.scanner.probe import HttpProbeResult, probe_http_or_https
 
@@ -66,9 +67,38 @@ def proxied_favicon_url(favicon_url: str) -> str:
     return f"/api/favicon?url={quote(favicon_url, safe='')}"
 
 
+def resolve_scan_ports(value: str) -> list[int]:
+    """Expand a scan-port spec into ports, with ``auto`` meaning every
+    currently-listening TCP port. ``auto`` combines with explicit ports."""
+    explicit_parts: list[str] = []
+    include_listening = False
+
+    for raw_part in value.split(","):
+        part = raw_part.strip()
+        if not part:
+            continue
+        if part.lower() == AUTO_TOKEN:
+            include_listening = True
+        else:
+            explicit_parts.append(part)
+
+    ports: list[int] = []
+    seen: set[int] = set()
+
+    candidates = discover_listening_ports() if include_listening else []
+    candidates += parse_scan_ports(",".join(explicit_parts))
+
+    for port in candidates:
+        if port not in seen:
+            seen.add(port)
+            ports.append(port)
+
+    return ports
+
+
 async def scan_services(settings: Settings) -> tuple[datetime, list[ServiceRecord]]:
     checked_at = datetime.now(UTC)
-    ports = [port for port in parse_scan_ports(settings.scan_ports) if port != settings.port]
+    ports = [port for port in resolve_scan_ports(settings.scan_ports) if port != settings.port]
     docker_metadata = await inspect_docker_services(settings)
 
     async with httpx.AsyncClient(timeout=settings.request_timeout, follow_redirects=False, verify=False) as client:
@@ -79,7 +109,7 @@ async def scan_services(settings: Settings) -> tuple[datetime, list[ServiceRecor
     services = [
         service_from_probe(settings, port, result, checked_at, docker_metadata.get(port))
         for port, result in zip(ports, results, strict=True)
-        if result is not None
+        if result is not None and (result.content_type or "").startswith("text/html")
     ]
     return checked_at, services
 

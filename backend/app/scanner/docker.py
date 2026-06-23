@@ -43,7 +43,8 @@ def docker_metadata_by_port(containers: list[dict[str, Any]]) -> dict[int, Docke
     for container in containers:
         labels = container.get("Labels") or {}
         image = _string_or_none(container.get("Image"))
-        name = _container_name(container.get("Names"))
+        _names = container.get("Names")
+        name = (str(_names[0]).strip("/") or None) if isinstance(_names, list) and _names else None
         compose_project = _string_or_none(labels.get("com.docker.compose.project"))
         compose_service = _string_or_none(labels.get("com.docker.compose.service"))
 
@@ -68,14 +69,6 @@ def docker_metadata_by_port(containers: list[dict[str, Any]]) -> dict[int, Docke
             )
 
     return metadata
-
-
-def _container_name(names: Any) -> str | None:
-    if not isinstance(names, list) or not names:
-        return None
-
-    value = str(names[0]).strip("/")
-    return value or None
 
 
 def _string_or_none(value: Any) -> str | None:

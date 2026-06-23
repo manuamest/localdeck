@@ -22,12 +22,17 @@ async def favicon(url: str, request: Request) -> Response:
     try:
         async with httpx.AsyncClient(
             timeout=request.app.state.settings.request_timeout,
-            follow_redirects=False,
+            follow_redirects=True,
+            max_redirects=3,
             verify=False,
         ) as client:
             upstream = await client.get(target_url)
     except httpx.HTTPError as error:
         raise HTTPException(status_code=404, detail="Favicon unavailable") from error
+
+    final_host = urlparse(str(upstream.url)).hostname or ""
+    if not is_allowed_local_host(final_host):
+        raise HTTPException(status_code=400, detail="Favicon URL must be local")
 
     content_type = upstream.headers.get("content-type", "")
     if upstream.status_code >= 400 or not content_type.startswith("image/"):

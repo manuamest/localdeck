@@ -22,9 +22,9 @@ def test_favicon_proxy_serves_local_images(monkeypatch: pytest.MonkeyPatch) -> N
             return None
 
         async def get(self, url: str):
-            from httpx import Response
+            from httpx import Request, Response
 
-            return Response(200, headers={"content-type": "image/svg+xml"}, content=b"<svg></svg>")
+            return Response(200, headers={"content-type": "image/svg+xml"}, content=b"<svg></svg>", request=Request("GET", url))
 
     monkeypatch.setattr("app.api.favicon.httpx.AsyncClient", FakeAsyncClient)
 
@@ -47,9 +47,9 @@ def test_favicon_proxy_supports_head(monkeypatch: pytest.MonkeyPatch) -> None:
             return None
 
         async def get(self, url: str):
-            from httpx import Response
+            from httpx import Request, Response
 
-            return Response(200, headers={"content-type": "image/svg+xml"}, content=b"<svg></svg>")
+            return Response(200, headers={"content-type": "image/svg+xml"}, content=b"<svg></svg>", request=Request("GET", url))
 
     monkeypatch.setattr("app.api.favicon.httpx.AsyncClient", FakeAsyncClient)
 
