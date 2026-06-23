@@ -14,6 +14,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Docker image](https://ghcr-badge.egpl.dev/manuamest/localdeck/size?tag=latest&label=image)
 
 </div>
 
@@ -22,6 +23,18 @@ Localdeck answers one question: what web applications are currently running on y
 ![Localdeck demo](docs/demo.gif)
 
 ## How it works
+
+```bash
+docker run --network host ghcr.io/manuamest/localdeck
+```
+
+Then open `http://localhost:4888`. No config required — or mount the Docker socket for richer metadata:
+
+```bash
+docker run --network host -v /var/run/docker.sock:/var/run/docker.sock:ro ghcr.io/manuamest/localdeck
+```
+
+### Running from source
 
 1. Run `docker compose up --build` in the project root.
 2. Open `http://localhost:4888` in your browser.

@@ -1,7 +1,7 @@
 services:
   localdeck:
-    build: .
-    image: localdeck:dev
+    image: ghcr.io/manuamest/localdeck:latest
+    build: .  # omit this line when using the published image directly
     network_mode: host
     environment:
       LOCALDECK_HOST: localhost
