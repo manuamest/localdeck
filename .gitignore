@@ -12,10 +12,13 @@ venv/
 node_modules/
 dist/
 build/
+backend/uv.lock
 
 # Local tooling dependencies
 .opencode/node_modules/
 scripts/.videos/
+.codegraph
+.pagecast
 
 # Environment files
 .env
